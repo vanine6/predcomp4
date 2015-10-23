@@ -63,7 +63,7 @@ img {
 <div id="header">
 <h1 class="title">Developing Data Product - Course Project</h1>
 <h4 class="author"><em>Marcos Vanine Nader</em></h4>
-<h4 class="date"><em>October, 18th 2015</em></h4>
+<h4 class="date"><em>October, 23th 2015</em></h4>
 </div>
 
 
@@ -71,13 +71,37 @@ img {
 <h1>Comparison of prediction algorithms and parameters for the Iris dataset.</h1>
 <p>This application is based on the Machine Learning Course. The course project consisted of applying prediction algorithms with a variety of parameters and methods in order to find out which combination of these artifacts is more appropriate for the input data set. The dataset was a measurement from wearable devices when someone was practicing exercises in some classes of execution (just one correct among 5 classes).</p>
 <p>Therefore, based on this interesting problem, I decided to develop an application that permits the user to choose parameters, methods and algorithms, process the data partition to separate train and test data set, run the train algorithm and finally generate the results. The user analyzes these results and after some interactions varying the input values, determine one or more good solutions for the prediction.</p>
-<p>I used the Iris database instead the original dataset because the latter is too big, which causes a long time to run the train algorithms in a simple machine.</p>
+<p>I used the Iris dataset instead the original dataset because the latter is too big, which causes a long time to run the train algorithms in a simple machine.</p>
+<div id="background-for-feature-selection-parameter" class="section level2">
+<h2>Background for Feature Selection Parameter</h2>
+<p>The iris data set gives the measurements in centimeters of the variables sepal length and width and petal length and width, respectively, for 50 flowers from each of 3 species of iris. The species are Iris setosa, versicolor, and virginica.</p>
+<p>The following code shows some entries in the data set.</p>
+<pre class="r"><code>data(&quot;iris&quot;)
+head(iris)</code></pre>
+<pre><code>##   Sepal.Length Sepal.Width Petal.Length Petal.Width Species
+## 1          5.1         3.5          1.4         0.2  setosa
+## 2          4.9         3.0          1.4         0.2  setosa
+## 3          4.7         3.2          1.3         0.2  setosa
+## 4          4.6         3.1          1.5         0.2  setosa
+## 5          5.0         3.6          1.4         0.2  setosa
+## 6          5.4         3.9          1.7         0.4  setosa</code></pre>
+<p>In order to define the feature parameter, we extracted the importance order of the features based on the training and varImp function.</p>
+<p>The code below presents how we determined the importance.</p>
+<pre class="r"><code>fs_itrain&lt;-createDataPartition (y=iris$Species, p=0.7, list=FALSE)
+fs_training&lt;-iris[fs_itrain,]
+fs_modFit&lt;-train(Species~.,data=fs_training,method=&quot;rf&quot;, trTrain=trainControl(method=&quot;cv&quot;, 5))
+fs_varImp&lt;-varImp(fs_modFit,scale=FALSE)
+fs_names&lt;-rownames(fs_varImp$importance)[order(fs_varImp$importance, decreasing=TRUE)]
+fs_names</code></pre>
+<pre><code>## [1] &quot;Petal.Length&quot; &quot;Petal.Width&quot;  &quot;Sepal.Length&quot; &quot;Sepal.Width&quot;</code></pre>
+<p>We decided to group the two first and the two last for the feature parameter. See the next section.</p>
+</div>
 <div id="application-input" class="section level2">
 <h2>Application Input</h2>
 <p>Input types for the application are:</p>
 <ul>
 <li>Percentage of the source file data to be used for Training and hence to the test. This parameter varies from 50% to 90%, the default equals to 70%.</li>
-<li>Features permit to select Sepal (Width+length), Petal(Width+Length) or all (Sepal + Petal).</li>
+<li>Features permit to select Petal (Width+length), Sepal(Width+Length) or all 4 features.</li>
 <li>Training Control Method and can be bootstrap and cross-validation - in the latter case, the variations are k = 5 and k = 10, recommended the by the reference book in the Machine Learning course.</li>
 <li>Algorithms used for training are: (1) Random forest (rf); (2) Boosting with trees (gbm); (3) Tree bag (treebag); (4) Model Based Prediction (lda).</li>
 </ul>

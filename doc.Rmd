@@ -1,7 +1,7 @@
 ---
 title: "Developing Data Product - Course Project"
 author: "Marcos Vanine Nader"
-date: "October, 18th 2015"
+date: "October, 23th 2015"
 output: html_document
 ---
 #Comparison of prediction algorithms and parameters for the Iris dataset.
@@ -14,8 +14,42 @@ Therefore, based on this interesting problem, I decided to develop an applicatio
 The user analyzes these results and after some interactions varying the input values, determine one or more good solutions for the prediction.
 
 
-I used the Iris database instead the original dataset because the latter is too big, which causes a long time to run the train algorithms in a simple machine.
+I used the Iris dataset instead the original dataset because the latter is too big, which causes a long time to run the train algorithms in a simple machine.
 
+
+## Background for Feature Selection Parameter
+
+The iris data set gives the measurements in centimeters of the variables sepal length and width and petal length and width, respectively, for 50 flowers from each of 3 species of iris. The species are Iris setosa, versicolor, and virginica. 
+
+The following code shows some entries in the data set.
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+library(caret)
+library(randomForest)
+library(lattice)
+library(ggplot2)
+```
+
+```{r warning=FALSE}
+
+data("iris")
+head(iris)
+```
+
+In order to define the feature parameter, we extracted the importance order of the features based on the training and varImp function. 
+
+The code below presents how we determined the importance.
+
+```{r warning=FALSE}
+fs_itrain<-createDataPartition (y=iris$Species, p=0.7, list=FALSE)
+fs_training<-iris[fs_itrain,]
+fs_modFit<-train(Species~.,data=fs_training,method="rf", trTrain=trainControl(method="cv", 5))
+fs_varImp<-varImp(fs_modFit,scale=FALSE)
+fs_names<-rownames(fs_varImp$importance)[order(fs_varImp$importance, decreasing=TRUE)]
+fs_names
+```
+
+We decided to group the two first and the two last for the feature parameter. See the next section.
 
 ##Application Input
 
@@ -23,7 +57,7 @@ I used the Iris database instead the original dataset because the latter is too 
 Input types for the application are:
 
 * Percentage of the source file data to be used for Training and hence to the test. This parameter varies from 50% to 90%, the default equals to 70%.
-* Features permit to select Sepal (Width+length), Petal(Width+Length) or all (Sepal + Petal). 
+* Features permit to select Petal (Width+length), Sepal(Width+Length) or all 4 features. 
 * Training Control Method and can be bootstrap and cross-validation - in the latter case, the variations are k = 5 and k = 10, recommended the by the reference book in the Machine Learning course.
 * Algorithms used for training are: (1) Random forest (rf); (2) Boosting with trees (gbm); (3) Tree bag (treebag); (4) Model Based Prediction (lda).
 
